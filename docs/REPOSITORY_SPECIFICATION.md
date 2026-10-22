@@ -1,6 +1,6 @@
 # Repository specification: aether-ai-knowledge
 
-**Status:** Documentation baseline copied from the Aether AI master specification. Implementation status must be verified separately.
+**Status:** Repository exists; documentation-only on the inspected `main` branch. No application implementation is present in the audited tree.
 
 ## Mission
 
@@ -8,7 +8,7 @@ Knowledge collections, source ownership, permissions, ingestion status, and inde
 
 ## Dependencies and connections
 
-Files public lifecycle contract; database persistence/migration conventions; auth principal/session contract; security policy contract. Knowledge must not import RAG or Search implementation. RAG and Search consume versioned knowledge metadata/ACL/indexing contracts or events.
+aether-ai-files, aether-ai-database, aether-ai-auth for principal/session types, and aether-ai-security.
 
 ## Owned capabilities
 
