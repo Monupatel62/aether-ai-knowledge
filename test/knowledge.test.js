@@ -66,3 +66,17 @@ test("fails closed on concurrent revocation", async () => {
   } }).service;
   await assert.rejects(conflicted.revokeSource({ principal, sourceId: source.id }), (e) => e.code === "version_conflict");
 });
+
+
+test("fails closed when metadata storage returns malformed records", async () => {
+  const { service, collections, sources } = fixture();
+  const collection = await service.createCollection({ principal, name: "Research" });
+  collections.set(collection.id, { id: collection.id, tenantId: "tenant-a", status: "active" });
+  await assert.rejects(service.addFileSource({ principal, collectionId: collection.id, fileId: "file-1", title: "paper.pdf" }), (e) => e.code === "store_unavailable");
+
+  const clean = fixture();
+  const goodCollection = await clean.service.createCollection({ principal, name: "Research" });
+  const source = await clean.service.addFileSource({ principal, collectionId: goodCollection.id, fileId: "file-1", title: "paper.pdf" });
+  clean.sources.set(source.id, { ...source, aclVersion: "1" });
+  await assert.rejects(clean.service.revokeSource({ principal, sourceId: source.id }), (e) => e.code === "store_unavailable");
+});
