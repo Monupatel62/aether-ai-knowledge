@@ -2,7 +2,11 @@
 
 Knowledge collections, source ownership, permissions, ingestion status, and index lifecycle.
 
-**Status:** Documentation foundation only; no implementation or deployment is claimed.
+**Status:** Initial knowledge source metadata validator is in review. No collection storage, ACL enforcement, ingestion pipeline, or index lifecycle is implemented.
+
+## Initial implementation
+
+The draft package validates source/collection/owner/tenant identifiers, opaque source references, source and ACL versions, classification, ingestion state, and lifecycle timestamp shape. It does not authenticate owners, authorize collection operations, persist sources, publish lifecycle events, or guarantee stale-index deletion/revocation. Those require approved identity/ACL and event-delivery contracts.
 
 ## Documentation
 - [Project specification](docs/PROJECT_SPEC.md)
