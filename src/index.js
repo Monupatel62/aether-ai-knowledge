@@ -8,6 +8,17 @@ function isRecord(value) { return value !== null && typeof value === "object" &&
 function validId(value) { return typeof value === "string" && ID.test(value) && value.trim() === value; }
 function validName(value) { return typeof value === "string" && value.trim() === value && value.length >= 1 && value.length <= 200 && !/[\u0000-\u001f\u007f]/.test(value); }
 function principalOk(value) { return isRecord(value) && validId(value.id) && validId(value.tenantId); }
+function validCollection(value, tenantId) {
+  return isRecord(value) && validId(value.id) && value.tenantId === tenantId && validId(value.ownerId)
+    && validName(value.name) && ["active", "archived"].includes(value.status)
+    && Number.isSafeInteger(value.version) && value.version >= 1 && Number.isSafeInteger(value.createdAt);
+}
+function validSource(value, tenantId) {
+  return isRecord(value) && validId(value.id) && value.tenantId === tenantId && validId(value.collectionId)
+    && validId(value.fileId) && validName(value.title) && ["active", "revoked"].includes(value.status)
+    && Number.isSafeInteger(value.aclVersion) && value.aclVersion >= 1
+    && Number.isSafeInteger(value.lifecycleVersion) && value.lifecycleVersion >= 1 && Number.isSafeInteger(value.createdAt);
+}
 
 /**
  * Metadata service contract. The store must make source+outbox writes atomic;
@@ -38,6 +49,7 @@ export function createKnowledgeService({ store, authorize, canReferenceFile, clo
       if (!validId(collectionId) || !validId(fileId) || !validName(title)) throw new KnowledgeError("invalid_source");
       let collection;
       try { collection = await store.getCollection({ id: collectionId, tenantId: principal.tenantId }); } catch { throw new KnowledgeError("store_unavailable"); }
+      if (collection !== null && collection !== undefined && !validCollection(collection, principal.tenantId)) throw new KnowledgeError("store_unavailable");
       if (!collection || collection.status !== "active" || collection.tenantId !== principal.tenantId) throw new KnowledgeError("collection_not_found");
       if (!await allowed(principal, "knowledge:source:create", { type: "knowledge_source", tenantId: principal.tenantId, collectionId })) throw new KnowledgeError("forbidden");
       let fileAllowed = false;
@@ -54,6 +66,7 @@ export function createKnowledgeService({ store, authorize, canReferenceFile, clo
       if (!validId(sourceId)) throw new KnowledgeError("invalid_source_id");
       let source;
       try { source = await store.getSource({ id: sourceId, tenantId: principal.tenantId }); } catch { throw new KnowledgeError("store_unavailable"); }
+      if (source !== null && source !== undefined && !validSource(source, principal.tenantId)) throw new KnowledgeError("store_unavailable");
       if (!source || source.status !== "active" || source.tenantId !== principal.tenantId) throw new KnowledgeError("source_not_found");
       if (!await allowed(principal, "knowledge:source:revoke", { type: "knowledge_source", id: source.id, tenantId: source.tenantId, collectionId: source.collectionId })) throw new KnowledgeError("forbidden");
       const at = clock();
