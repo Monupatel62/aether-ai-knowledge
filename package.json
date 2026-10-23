@@ -1,0 +1,10 @@
+{
+  "name": "@aether-ai/knowledge",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Tenant-scoped knowledge collection/source metadata and lifecycle contracts.",
+  "type": "module",
+  "engines": { "node": ">=20" },
+  "exports": { ".": "./src/index.js" },
+  "scripts": { "test": "node --test", "check": "node --check src/index.js && node --check test/knowledge.test.js" }
+}
